@@ -1,22 +1,14 @@
 const express = require('express');
 const app = express();
-const bodyParser = require('body-parser')
-const morgan = require('morgan')
-const AccountRouter = require('./routers/accountRoute');
-const AuthRouter = require('./routers/authRoute')
+
 const TestRouter = require('./routers/testRoute')
 const dotenv = require('dotenv');
-const mysql = require('mysql');
-const nodemailer = require("nodemailer");
+
 
 dotenv.config();
 
 // parse application/json
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
-app.use(morgan("combined"));
-app.use('/api/account/', AccountRouter)
-app.use('/', AuthRouter)
+
 app.use('/sendMail', TestRouter)
 
 app.get('/', (req, res, next) => {
