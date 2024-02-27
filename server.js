@@ -1,63 +1,50 @@
 const express = require('express');
 const app = express();
-
-const TestRouter = require('./routers/testRoute')
+const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
-
 
 dotenv.config();
 
-// parse application/json
+// Middleware để xử lý dữ liệu từ phần thân của yêu cầu POST
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use('/sendMail', TestRouter)
+const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+        // Sử dụng biến môi trường để lưu thông tin đăng nhập
+        user: 'thanhtu19052000@gmail.com',
+        pass: 'bgbm fweu wfgs wshf',
+    },
+});
+
+const sendMail = async (email, subject, html) => {
+    try {
+        const info = await transporter.sendMail({
+            from: '"Thanh Tu" <thanhtu19052000@gmail.com>',
+            to: email,
+            subject: subject,
+            html: html,
+        });
+        console.log("Message sent: %s", info.messageId);
+    } catch (error) {
+        console.error("Error occurred while sending email:", error);
+    }
+};
+
+app.post('/sendMail', async (req, res, next) => {
+    const { email, subject, html } = req.body;
+    sendMail(email, subject, html);
+    res.send('success');
+});
 
 app.get('/', (req, res, next) => {
     res.json('home');
-})
-// app.post('/login',(req,res,next)=>{
-//     const username =  req.body.username;
-//     const password =  req.body.password;
-//     AccountModal.findOne({
-//         username:username,
-//         passwords:password,
-//     }).then(data=>{
-//         if(data){
-//             res.json('login success')
-//         }else{
-//             res.json('login fail')
-//         }
-//     }).catch(err=>{
-//         res.status('500').json('Loi he thong')
-//     })
-// })
-// app.post('/register',(req,res,next)=>{
-//     const username =  req.body.username;
-//     const password =  req.body.password;
-//     AccountModal.findOne({
-//         username:username
-//     }).then(data=>{
-//         if(data){
-//             res.json('Ton tai user');
-//         }else{
-//             return AccountModal.create({
-//                 username:username,
-//                 passwords:password,
-//             })
-//         }
-//     }).then(data=>{
-//         res.json('tao acc thanh cong')
-//     }).catch(err=>{
-//         res.status('500').json('Loi he thong')
-//     })
-// })
+});
 
-
-
-
-
-
-
-const PORT = process.env.PROT || 4000;
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-    console.log('server start on port ', PORT);
-})
+    console.log('Server started on port ', PORT);
+});
